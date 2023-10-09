@@ -37,6 +37,18 @@ func NewClientWithBucket(endpoint string, accessKeyID string, secretAccessKey st
 
 }
 
+func (s *StoreClient) Download(object string, destdir string, filename string) error {
+
+	err := os.MkdirAll(destdir, 0755)
+	if err != nil {
+		return err
+	}
+
+	err = s.FGetObject(context.Background(), s.Bucket, object, destdir+"/"+filename, minio.GetObjectOptions{})
+	return err
+
+}
+
 func (s *StoreClient) ListObjs(prefix string) <-chan minio.ObjectInfo {
 
 	objectCh := s.ListObjects(context.Background(), s.Bucket, minio.ListObjectsOptions{
