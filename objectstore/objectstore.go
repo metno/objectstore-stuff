@@ -124,6 +124,37 @@ func (s *StoreClient) ObjectExists(name string) (bool, error) {
 	return true, nil
 }
 
+func (s *StoreClient) DownloadObj(objectName string, outPath string) error {
+
+	obj, err := s.GetObject(context.Background(), s.Bucket, objectName, minio.GetObjectOptions{})
+	if err != nil {
+		return fmt.Errorf("DownloadObj.GetObject(): %v", err)
+	}
+	defer obj.Close()
+
+	localFile, err := os.Create(outPath)
+	if err != nil {
+		return fmt.Errorf("DownloadObj.Create(): %v", err)
+	}
+	defer localFile.Close()
+
+	_, err = io.Copy(localFile, obj)
+	if err != nil {
+		return fmt.Errorf("DownloadObj.Copy(): %v", err)
+	}
+	fi, err := localFile.Stat()
+	if err != nil {
+		return fmt.Errorf("DownloadObj.Stat(): %v", err)
+	}
+	if fi.Size() == 0 {
+		return fmt.Errorf("DownloadObj file is zero bytes")
+	}
+
+	fmt.Printf("The file is %d bytes long", fi.Size())
+	return nil
+
+}
+
 func (s *StoreClient) Object2Tempfile(objectName string) (string, error) {
 
 	f, err := os.CreateTemp("/tmp", "object-")
@@ -147,8 +178,6 @@ func (s *StoreClient) Object2Tempfile(objectName string) (string, error) {
 	if _, err = io.Copy(localFile, obj); err != nil {
 		return "", fmt.Errorf("Object2Tempfile.Copy(): %v", err)
 	}
-
-	//var r io.Reader = obj
 
 	return f.Name(), nil
 
