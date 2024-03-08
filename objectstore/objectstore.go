@@ -162,7 +162,7 @@ func (s *StoreClient) DownloadObj(objectName string, outPath string) error {
 		return fmt.Errorf("DownloadObj file is zero bytes")
 	}
 
-	fmt.Printf("The file is %d bytes long", fi.Size())
+	//fmt.Printf("The file is %d bytes long", fi.Size())
 	return nil
 
 }
