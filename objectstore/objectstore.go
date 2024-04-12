@@ -152,6 +152,10 @@ func (s *StoreClient) DownloadObj(objectName string, outPath string) error {
 
 	_, err = io.Copy(localFile, obj)
 	if err != nil {
+		e := os.Remove(localFile.Name())
+		if e != nil {
+			return fmt.Errorf("DownloadObj.Copy() remove: %v", err)
+		}
 		return fmt.Errorf("DownloadObj.Copy(): %v", err)
 	}
 	fi, err := localFile.Stat()
@@ -159,6 +163,10 @@ func (s *StoreClient) DownloadObj(objectName string, outPath string) error {
 		return fmt.Errorf("DownloadObj.Stat(): %v", err)
 	}
 	if fi.Size() == 0 {
+		e := os.Remove(localFile.Name())
+		if e != nil {
+			return fmt.Errorf("DownloadObj.Copy() fs.Size(): %v", err)
+		}
 		return fmt.Errorf("DownloadObj file is zero bytes")
 	}
 
